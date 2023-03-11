@@ -10,8 +10,6 @@ The [Parse Don't Validate paper](https://lexi-lambda.github.io/blog/2019/11/05/p
 
 Choose your favorite method for vendoring this code into your repository. I've been using [zigmod](https://github.com/nektro/zigmod) lately, and it's pretty painless. I also generally like [git-subrepo](https://github.com/ingydotnet/git-subrepo), copy-paste is always a winner, and whenever the official package manager is up we'll be there too.
 
-Note: I wrote this targeting an 0.11-dev Zig compiler, and it seems Zigmod isn't compatible with those beta releases yet. The only breaking changes I think I'm using are the build syntax and new for loops, but installation might be hairy for the time being.
-
 ## Examples
 ```zig
 const std = @import("std");

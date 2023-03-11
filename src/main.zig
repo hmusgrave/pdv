@@ -3,8 +3,10 @@ const testing = std.testing;
 
 pub inline fn Constraint(comptime wrapped: type, comptime types: anytype) type {
     comptime var idx: [types.len]type = undefined;
-    for (idx[0..], types) |*x, T|
-        x.* = T;
+    //for (idx[0..], types) |*x, T|
+    //    x.* = T;
+    for (idx[0..]) |*x, i|
+        x.* = types[i];
     return _Constraint(wrapped, idx);
 }
 
@@ -71,7 +73,7 @@ inline fn Merge(comptime A: anytype, comptime B: anytype) type {
 
 inline fn merge(comptime A: anytype, comptime B: anytype) Merge(A, B) {
     comptime var rtn: Merge(A, B) = undefined;
-    for (A, 0..) |a, i|
+    for (A) |a, i|
         rtn[i] = a;
     comptime var j = A.len;
     outer: for (B) |b| {
