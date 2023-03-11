@@ -1,0 +1,6 @@
+id: fxv6y56arrkpxcdrrfvgkmm4jwgrbams6gvxf0fxev855ikz
+name: pdv
+main: src/main.zig
+license: AGPL-3.0
+description: parse don't validate
+dependencies:
