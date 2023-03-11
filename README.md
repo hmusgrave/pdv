@@ -8,7 +8,34 @@ The [Parse Don't Validate paper](https://lexi-lambda.github.io/blog/2019/11/05/p
 
 ## Installation
 
-Choose your favorite method for vendoring this code into your repository. I've been using [zigmod](https://github.com/nektro/zigmod) lately, and it's pretty painless. I also generally like [git-subrepo](https://github.com/ingydotnet/git-subrepo), copy-paste is always a winner, and whenever the official package manager is up we'll be there too.
+Zig has a package manager!!! Do something like the following.
+
+```zig
+// build.zig.zon
+.{
+    .name = "foo",
+    .version = "0.0.0",
+
+    .dependencies = .{
+        .pdv = .{
+            .name = "pdv",
+            .url = "https://github.com/hmusgrave/pdv/archive/refs/tags/z11.0.0.2.tar.gz",
+            .hash = "122024edc331a6310e2f6189923d35453acb8faf51a950b0d4185eb7eed73e8c5c85",
+        },
+    },
+}
+```
+
+```zig
+// build.zig
+const pdv_pkg = b.dependency("pdv", .{
+    .target = target,
+    .optimize = optimize,
+});
+const pdv_mod = pdv_pkg.module("pdv");
+exe.addModule("pdv", pdv_mod);
+exe_tests.addModule("pdv", pdv_mod);
+```
 
 ## Examples
 ```zig
