@@ -18,7 +18,7 @@ const pdv = @import("pdv");
 const NonEmpty = struct {};
 const AllPositive = struct {};
 
-fn arr_min(comptime T: type, wrapped_data: pdv.Constraint([]T, .{NonEmpty})) T {
+fn arr_min(comptime T: type, wrapped_data: pdv.Constraint([]const T, .{NonEmpty})) T {
     // unwrap the data, and optionally check any constraints you would
     // like to ensure it satisfies
     const data = wrapped_data.extract(.{NonEmpty});
@@ -36,23 +36,23 @@ fn arr_min(comptime T: type, wrapped_data: pdv.Constraint([]T, .{NonEmpty})) T {
     return min;
 }
 
-fn parse_contains_all_positives(comptime T: type, data: []T) ?pdv.Constraint([]T, .{NonEmpty, AllPositive}) {
+fn parse_contains_all_positives(comptime T: type, data: []const T) ?pdv.Constraint([]const T, .{ NonEmpty, AllPositive }) {
     if (data.len == 0)
         return null;
-    var non_empty_data = pdv.constrain([]T, data, .{NonEmpty});
+    var non_empty_data = pdv.constrain([]const T, data, .{NonEmpty});
 
     for (data) |x| {
         if (x <= 0)
-	    return null;
+            return null;
     }
     var all_positives = non_empty_data.expand(.{AllPositive});
-    
-    // or return pdv.Constraint([]T, .{NonEmpty, AllPositive}){.val = data};
+
+    // or return pdv.Constraint([]const T, .{NonEmpty, AllPositive}){.val = data};
     return all_positives;
 }
 
 test "something" {
-    const data = [_]u8{1, 2, 3};
+    const data = [_]u8{ 1, 2, 3 };
 
     // real-world code might need to handle errors, but our example by construction
     // is non-empty and all-positive
@@ -61,8 +61,8 @@ test "something" {
     // it's easy to type-erase the fact that the entries are positive to satisfy
     // the non-emptiness our `arr_min` function requires
     //
-    // alternatively, arr_min(parsed_data.as(pdv.Constraint([]u8, .{NonEmpty})))
-    const min = arr_min(parsed_data.restrict(.{NonEmpty}));
+    // alternatively, arr_min(u8, parsed_data.as(pdv.Constraint([]const u8, .{NonEmpty})))
+    const min = arr_min(u8, parsed_data.restrict(.{NonEmpty}));
 
     // sanity-check that we did something
     try std.testing.expectEqual(min, 1);
