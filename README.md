@@ -97,7 +97,7 @@ test "something" {
 ```
 
 ## Status
-Work has me pretty busy lately, so I might have a few weeks lead time on any responses. Also note that we don't do anything special with respect to canonicalization, so the following will fail to type-check because the orders don't match:
+Note that we don't do anything special with respect to canonicalization, so the following will fail to type-check because the orders don't match:
 
 ```zig
 fn foo(_: pdv.Constraint(u8, .{Positive, Even})) void {}
