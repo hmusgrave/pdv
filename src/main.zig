@@ -1,6 +1,40 @@
 const std = @import("std");
 const testing = std.testing;
 
+fn naive_memoize(comptime _: anytype) type {
+    return opaque {};
+}
+
+test "structural equality sanity check" {
+    // If we're going to canonicalize types by relying on a memoized wrapper type then
+    // we should ensure the memoization actually does what we expect. I recall a discussion
+    // about exactly how memoization should work for arrays, strings, and whatnot, so this
+    // test should probably stick around at least till Zig-1.0. If it fails, the rest
+    // of the library is probably broken for most uses.
+
+    // a couple unique types for setup
+    const a = opaque {};
+    const b = opaque {};
+
+    // ensure we're working with different types
+    try testing.expect(a != b);
+
+    // ensure that memoization yields different types
+    try testing.expect(naive_memoize(a) != naive_memoize(b));
+
+    // ensure the call is actually memoized
+    try testing.expectEqual(naive_memoize(a), naive_memoize(a));
+
+    // test for structural equality
+    const c: [2]type = .{ a, b };
+    const d: [2]type = .{ a, b };
+    try testing.expectEqual(naive_memoize(c), naive_memoize(d));
+
+    // sanity check that structural equality can return false
+    const e: [2]type = .{ a, a };
+    try testing.expect(naive_memoize(c) != naive_memoize(e));
+}
+
 pub inline fn Constraint(comptime wrapped: type, comptime types: anytype) type {
     comptime var idx: [types.len]type = undefined;
     for (idx[0..], types) |*x, T|
