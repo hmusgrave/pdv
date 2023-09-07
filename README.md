@@ -97,19 +97,4 @@ test "something" {
 ```
 
 ## Status
-Note that we don't do anything special with respect to canonicalization, so the following will fail to type-check because the orders don't match:
-
-```zig
-fn foo(_: pdv.Constraint(u8, .{Positive, Even})) void {}
-
-test "foo" {
-    const x: u8 = 4;
-
-    // Note that `Positive` and `Even` have swapped positions with respect
-    // to their order in the type signature of `foo`
-    const pos_even_x = pdv.constrain(u8, x, .{Even, Positive});
-
-    foo(pos_even_x);  // compile error
-    foo(pos_even_x.restrict(.{Positive, Even}));  // succeeds because we match the order in `foo`
-}
-```
+Updated for `zig-0.12.0-dev.86+197d9a9eb`.

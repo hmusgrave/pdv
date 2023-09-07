@@ -35,11 +35,71 @@ test "structural equality sanity check" {
     try testing.expect(naive_memoize(c) != naive_memoize(e));
 }
 
+// TODO: kind of hacky and prone to misuse?
+fn type_id_gen(comptime _: anytype) type {
+    comptime var count: usize = 0;
+    return struct {
+        pub fn idx(comptime T: anytype) usize {
+            _ = T;
+            defer count += 1;
+            return count;
+        }
+    };
+}
+
+fn type_lt(comptime lhs: anytype, comptime rhs: anytype) bool {
+    comptime var id_gen = type_id_gen(0);
+    return id_gen.idx(lhs) < id_gen.idx(rhs);
+}
+
+// TODO: sorting and comptime slices of types don't play well in the stdlib.
+// - can't sort the slice because some comptime issue is messing with the
+//   memory layout and cloning rather than referencing or something
+// - can't use std without tricks because of a lack of comptime in the
+//   comparator signature
+fn sorted_types(comptime n: usize, comptime items: [n]type) [n]type {
+    comptime var result: [n]type = items;
+    comptime var i = 1;
+    inline while (i < items.len) : (i += 1) {
+        comptime var j = i;
+        inline while (j > 0 and comptime type_lt(result[j], result[j - 1])) : (j -= 1) {
+            const z = result[j];
+            result[j] = result[j - 1];
+            result[j - 1] = z;
+        }
+    }
+    return result;
+}
+
+test "type sort" {
+    // no clue what the sort order actually is, so we'll just see what we get,
+    // scramble the results, and see if we can get the same answer
+    const A = opaque {};
+    const AA = opaque {};
+    const AB = opaque {};
+
+    comptime var types: [3]type = .{ AA, AB, A };
+    types = sorted_types(types.len, types);
+
+    const a = types[0];
+    const b = types[1];
+    const c = types[2];
+
+    types[0] = b;
+    types[1] = c;
+    types[2] = a;
+    types = sorted_types(types.len, types);
+
+    try std.testing.expectEqual(types[0], a);
+    try std.testing.expectEqual(types[1], b);
+    try std.testing.expectEqual(types[2], c);
+}
+
 pub inline fn Constraint(comptime wrapped: type, comptime types: anytype) type {
     comptime var idx: [types.len]type = undefined;
     for (idx[0..], types) |*x, T|
         x.* = T;
-    return _Constraint(wrapped, idx);
+    return _Constraint(wrapped, sorted_types(types.len, idx));
 }
 
 pub inline fn constrain(comptime T: type, val: T, comptime constraints: anytype) Constraint(T, constraints) {
@@ -157,4 +217,13 @@ test "doesn't crash" {
         @TypeOf(also_even),
         @TypeOf(even_data),
     );
+}
+
+test "canonicalization" {
+    try std.testing.expectEqual(
+        Constraint(void, .{ u8, u16 }),
+        Constraint(void, .{ u16, u8 }),
+    );
+
+    try std.testing.expect(Constraint(void, .{ u8, u16 }) != Constraint(void, .{ u8, u24 }));
 }
