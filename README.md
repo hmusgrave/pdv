@@ -18,9 +18,8 @@ Zig has a package manager!!! Do something like the following.
 
     .dependencies = .{
         .pdv = .{
-            .name = "pdv",
-            .url = "https://github.com/hmusgrave/pdv/archive/refs/tags/z11.0.0.2.tar.gz",
-            .hash = "122024edc331a6310e2f6189923d35453acb8faf51a950b0d4185eb7eed73e8c5c85",
+	    .url = "https://github.com/hmusgrave/pdv/archive/refs/tags/1.0.tar.gz",
+	    .hash = "1220910f59739daa29dccc0d01743b4930dab6ba4e47ae1ffd4872076cecc8581c82",
         },
     },
 }
@@ -34,7 +33,7 @@ const pdv_pkg = b.dependency("pdv", .{
 });
 const pdv_mod = pdv_pkg.module("pdv");
 exe.addModule("pdv", pdv_mod);
-exe_tests.addModule("pdv", pdv_mod);
+unit_tests.addModule("pdv", pdv_mod);
 ```
 
 ## Examples
